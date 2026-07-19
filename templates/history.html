@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="page-header">
+  <h1>📜 Chat History</h1>
+  <p>All your previous questions with MARSHAI</p>
+</div>
+
+{% if chats %}
+  {% for chat in chats %}
+  <div class="glass-card history-card">
+    <div class="history-meta">
+      🕐 {{ chat.timestamp }}
+    </div>
+    <div class="history-q">❓ <strong>{{ chat.question }}</strong></div>
+    <div class="history-a">🤖 {{ chat.answer }}</div>
+  </div>
+  {% endfor %}
+{% else %}
+  <div class="glass-card empty-state">
+    <p>😊 No chat history yet! <a href="{{ url_for('chat') }}">Ask your first question!</a></p>
+  </div>
+{% endif %}
+
+{% endblock %}

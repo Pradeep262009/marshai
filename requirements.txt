@@ -1,0 +1,5 @@
+flask
+pyrebase4
+google-generativeai
+python-dotenv
+setuptools
