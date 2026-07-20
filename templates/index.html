@@ -1,8 +1,18 @@
 {% extends 'base.html' %}
 {% block content %}
+<!-- Google Sign-In Identity Services Library -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 
 <div class="auth-container">
   <div class="glass-card auth-card">
+    <!-- Google Sign-In configuration context -->
+    <div id="g_id_onload"
+         data-client_id="624249375059-7qqtd9ahs95lge6qcfnbgbo3qoa2vvkk.apps.googleusercontent.com"
+         data-context="signin"
+         data-ux_mode="popup"
+         data-callback="handleCredentialResponse"
+         data-auto_prompt="false">
+    </div>
     
     <!-- Tab Controls (Login / Signup) -->
     <div class="auth-tabs" id="auth-tabs-nav">
@@ -27,9 +37,9 @@
         <span>or</span>
       </div>
       <div class="social-actions">
-        <button type="button" class="btn-social btn-google" onclick="socialAuth('Google')">
-          <i class="fa-brands fa-google"></i> Continue with Google
-        </button>
+        <!-- Google Sign-In Official Button -->
+        <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="outline" data-text="continue_with" data-size="large" data-logo_alignment="left" data-width="384"></div>
+        
         <button type="button" class="btn-social btn-instagram" onclick="socialAuth('Instagram')">
           <i class="fa-brands fa-instagram"></i> Continue with Instagram
         </button>
@@ -61,9 +71,9 @@
         <span>or</span>
       </div>
       <div class="social-actions">
-        <button type="button" class="btn-social btn-google" onclick="socialAuth('Google')">
-          <i class="fa-brands fa-google"></i> Continue with Google
-        </button>
+        <!-- Google Sign-In Official Button -->
+        <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="outline" data-text="signup_with" data-size="large" data-logo_alignment="left" data-width="384"></div>
+        
         <button type="button" class="btn-social btn-instagram" onclick="socialAuth('Instagram')">
           <i class="fa-brands fa-instagram"></i> Continue with Instagram
         </button>
@@ -94,6 +104,27 @@
 </div>
 
 <script>
+  // Callback handler for official Google Sign-In
+  function handleCredentialResponse(response) {
+    // Send Google credential token to backend
+    fetch('/login/google', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id_token: response.credential })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        window.location.href = "{{ url_for('dashboard') }}";
+      } else {
+        alert('⚠️ Google Sign-In failed: ' + data.error);
+      }
+    })
+    .catch(err => {
+      alert('⚠️ Connection error during Google Sign-In.');
+    });
+  }
+
   // Helper function to handle social auth button clicks
   function socialAuth(provider) {
     alert("🔗 Social Auth with " + provider + " would be initiated! (Integration setup complete)");
