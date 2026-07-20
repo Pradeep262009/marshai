@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="page-header">
+  <h1>⚙️ Profile Settings</h1>
+  <p>Manage your student account details and metrics</p>
+</div>
+
+<div class="glass-card profile-card">
+  <div class="profile-avatar">🎓</div>
+  
+  <div class="profile-details">
+    <div class="profile-row">
+      <span class="profile-label">Student Name</span>
+      <span class="profile-value">{{ user.name }}</span>
+    </div>
+    <div class="profile-row">
+      <span class="profile-label">Email Address</span>
+      <span class="profile-value">{{ user.email }}</span>
+    </div>
+    <div class="profile-row">
+      <span class="profile-label">Account UID</span>
+      <span class="profile-value" style="font-family: monospace; font-size: 0.85rem; color: var(--text-secondary);">{{ user.uid }}</span>
+    </div>
+    <div class="profile-row" style="border-bottom: none;">
+      <span class="profile-label">Tutoring Sessions</span>
+      <span class="profile-value">{{ total }} chats</span>
+    </div>
+  </div>
+
+  <a href="{{ url_for('dashboard') }}" class="btn-primary" style="display: block; text-align: center; text-decoration: none;">
+    <i class="fa-solid fa-house"></i> Return to Dashboard
+  </a>
+</div>
+
+{% endblock %}

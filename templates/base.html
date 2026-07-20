@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MARSHAI - Your CS Tutor</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <!-- Animated Background Elements -->
+  <div class="bg-glow bg-glow-1"></div>
+  <div class="bg-glow bg-glow-2"></div>
+  <div class="bg-glow bg-glow-3"></div>
+
+  <!-- Header Navigation -->
+  <header class="navbar-wrapper">
+    <nav class="navbar container">
+      <a href="{{ url_for('index') }}" class="nav-brand">
+        <span class="brand-emoji">🤖</span>
+        <span class="brand-text">MARSHAI</span>
+      </a>
+
+      <!-- Mobile Menu Toggle -->
+      <button class="nav-toggle" id="nav-toggle" aria-label="Toggle Navigation">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+
+      <!-- Nav Links -->
+      <ul class="nav-links" id="nav-links">
+        {% if session.get('user') %}
+          <li>
+            <a href="{{ url_for('dashboard') }}" class="nav-link {% if request.path == '/dashboard' %}active{% endif %}">
+              <i class="fa-solid fa-chart-simple"></i> Dashboard
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('chat') }}" class="nav-link {% if request.path == '/chat' %}active{% endif %}">
+              <i class="fa-solid fa-comments"></i> Chat
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('history') }}" class="nav-link {% if request.path == '/history' %}active{% endif %}">
+              <i class="fa-solid fa-clock-rotate-left"></i> History
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('account') }}" class="nav-link {% if request.path == '/account' %}active{% endif %}">
+              <i class="fa-solid fa-user-gear"></i> Account
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('about') }}" class="nav-link {% if request.path == '/about' %}active{% endif %}">
+              <i class="fa-solid fa-circle-info"></i> About
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('logout') }}" class="nav-btn-logout">
+              <i class="fa-solid fa-right-from-bracket"></i> Logout
+            </a>
+          </li>
+        {% else %}
+          <li>
+            <a href="{{ url_for('index') }}" class="nav-link {% if request.path == '/' %}active{% endif %}">
+              <i class="fa-solid fa-house"></i> Home
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('about') }}" class="nav-link {% if request.path == '/about' %}active{% endif %}">
+              <i class="fa-solid fa-circle-info"></i> About
+            </a>
+          </li>
+        {% endif %}
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Flash/Error/Success Notifications -->
+  <div class="notifications-container container">
+    {% if error %}
+      <div class="alert alert-danger animate-fade-in">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <span>{{ error }}</span>
+        <button class="alert-close" onclick="this.parentElement.remove()">&times;</button>
+      </div>
+    {% endif %}
+    {% if success %}
+      <div class="alert alert-success animate-fade-in">
+        <i class="fa-solid fa-circle-check"></i>
+        <span>{{ success }}</span>
+        <button class="alert-close" onclick="this.parentElement.remove()">&times;</button>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Main Content Body -->
+  <main class="main-content container animate-fade-in">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer-wrapper">
+    <div class="container footer-content">
+      <p>Made with ❤️ for Computer Science students.</p>
+    </div>
+  </footer>
+
+  <!-- Script files -->
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+  <script>
+    // Navigation Toggle for Mobile Menu
+    const navToggle = document.getElementById('nav-toggle');
+    const navLinks = document.getElementById('nav-links');
+    if (navToggle && navLinks) {
+      navToggle.addEventListener('click', () => {
+        navLinks.classList.toggle('show');
+        const icon = navToggle.querySelector('i');
+        if (navLinks.classList.contains('show')) {
+          icon.className = 'fa-solid fa-xmark';
+        } else {
+          icon.className = 'fa-solid fa-bars';
+        }
+      });
+    }
+  </script>
+</body>
+</html>

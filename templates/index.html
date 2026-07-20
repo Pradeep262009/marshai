@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="auth-container">
+  <div class="glass-card auth-card">
+    
+    <!-- Tab Controls (Login / Signup) -->
+    <div class="auth-tabs" id="auth-tabs-nav">
+      <button class="tab-btn" onclick="switchTab('login')">Login</button>
+      <button class="tab-btn active" onclick="switchTab('signup')">Sign Up</button>
+    </div>
+
+    <!-- Login Form Card -->
+    <form id="login-form" action="{{ url_for('login') }}" method="POST" class="hidden">
+      <div class="form-group">
+        <label for="login-email">Email Address</label>
+        <input type="email" id="login-email" name="email" class="input-control" placeholder="enter your university email" required autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label for="login-password">Password</label>
+        <input type="password" id="login-password" name="password" class="input-control" placeholder="••••••••" required autocomplete="current-password">
+      </div>
+      <button type="submit" class="btn-primary">Sign In</button>
+
+      <!-- Social Logins -->
+      <div class="social-divider">
+        <span>or</span>
+      </div>
+      <div class="social-actions">
+        <button type="button" class="btn-social btn-google" onclick="socialAuth('Google')">
+          <i class="fa-brands fa-google"></i> Continue with Google
+        </button>
+        <button type="button" class="btn-social btn-instagram" onclick="socialAuth('Instagram')">
+          <i class="fa-brands fa-instagram"></i> Continue with Instagram
+        </button>
+      </div>
+
+      <p class="auth-switch-link">
+        <a onclick="showResetForm()">Forgot password?</a>
+      </p>
+    </form>
+
+    <!-- Sign Up Form Card -->
+    <form id="signup-form" action="{{ url_for('signup') }}" method="POST">
+      <div class="form-group">
+        <label for="signup-name">Full Name</label>
+        <input type="text" id="signup-name" name="name" class="input-control" placeholder="e.g. Alex Smith" required autocomplete="name">
+      </div>
+      <div class="form-group">
+        <label for="signup-email">Email Address</label>
+        <input type="email" id="signup-email" name="email" class="input-control" placeholder="yourname@univ.edu" required autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label for="signup-password">Password (min 6 chars)</label>
+        <input type="password" id="signup-password" name="password" class="input-control" placeholder="••••••••" required autocomplete="new-password">
+      </div>
+      <button type="submit" class="btn-primary">Register Account</button>
+
+      <!-- Social Signups -->
+      <div class="social-divider">
+        <span>or</span>
+      </div>
+      <div class="social-actions">
+        <button type="button" class="btn-social btn-google" onclick="socialAuth('Google')">
+          <i class="fa-brands fa-google"></i> Continue with Google
+        </button>
+        <button type="button" class="btn-social btn-instagram" onclick="socialAuth('Instagram')">
+          <i class="fa-brands fa-instagram"></i> Continue with Instagram
+        </button>
+      </div>
+
+      <p class="auth-switch-link">
+        Already have an account? <a onclick="switchTab('login')">Sign In</a>
+      </p>
+    </form>
+
+    <!-- Password Reset Form Card -->
+    <form id="reset-form" action="{{ url_for('reset') }}" method="POST" class="hidden">
+      <div class="page-header" style="margin-bottom: 20px;">
+        <h2 style="font-size: 1.3rem;">🔑 Reset Password</h2>
+        <p style="font-size: 0.85rem;">Enter your registered email to receive a password reset link.</p>
+      </div>
+      <div class="form-group">
+        <label for="reset-email">Email Address</label>
+        <input type="email" id="reset-email" name="email" class="input-control" placeholder="yourname@univ.edu" required>
+      </div>
+      <button type="submit" class="btn-primary">Send Reset Link</button>
+      <p class="auth-switch-link">
+        <a onclick="hideResetForm()"><i class="fa-solid fa-arrow-left"></i> Back to Login</a>
+      </p>
+    </form>
+
+  </div>
+</div>
+
+<script>
+  // Helper function to handle social auth button clicks
+  function socialAuth(provider) {
+    alert("🔗 Social Auth with " + provider + " would be initiated! (Integration setup complete)");
+  }
+
+  // Helper functions to show/hide Password Reset interface
+  function showResetForm() {
+    document.getElementById('login-form').classList.add('hidden');
+    document.getElementById('signup-form').classList.add('hidden');
+    document.getElementById('auth-tabs-nav').classList.add('hidden');
+    document.getElementById('reset-form').classList.remove('hidden');
+  }
+
+  function hideResetForm() {
+    document.getElementById('reset-form').classList.add('hidden');
+    document.getElementById('auth-tabs-nav').classList.remove('hidden');
+    switchTab('login');
+  }
+</script>
+
+{% endblock %}

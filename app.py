@@ -27,7 +27,7 @@ firebase = pyrebase.initialize_app(firebaseConfig)
 auth     = firebase.auth()
 
 # ── Flask Config ─────────────────────────────────────
-app = Flask(__name__)
+app = Flask(__name__, static_folder='templates/static')
 app.secret_key = os.getenv('SECRET_KEY', 'marshai-firebase-secret-2024')
 app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
@@ -135,12 +135,14 @@ def ask():
     user = get_current_user()
     if not user:
         return jsonify({'answer': '⚠️ Please login first.'})
-    data     = request.get_json()
-    question = data.get('question', '')
-    answer   = ask_marshai(question)
+    data       = request.get_json()
+    question   = data.get('question', '')
+    image_data = data.get('image', None) # dict {mime_type, data}
+    answer     = ask_marshai(question, image_data)
     
-    # Save to Firebase
-    save_chat_history(firebase, user['uid'], user['email'], question, answer)
+    # Save to Firebase (indicate image attachment in database log)
+    db_question = f"📷 [Image Scan] {question}" if image_data else question
+    save_chat_history(firebase, user['uid'], user['email'], db_question, answer)
     
     return jsonify({'answer': answer})
 

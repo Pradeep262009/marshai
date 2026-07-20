@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="page-header">
+  <h1>💬 Chat with MARSHAI</h1>
+  <p>Ask anything about algorithms, OOP, databases, or systems</p>
+</div>
+
+<div class="chat-container">
+  <!-- Chat messages list -->
+  <div id="chat-box" class="chat-box">
+    
+    <!-- Welcome Greeting Message -->
+    <div class="message bot-msg">
+      <span>🤖</span>
+      <div class="bubble">
+        Hello! I am <strong>MARSHAI</strong>, your Computer Science study assistant. 🎓<br><br>
+        Ask me any CS-related questions! Click one of the suggestions below to get started:<br>
+        <div class="suggestion-buttons">
+          <button class="suggestion-btn" onclick="quickAsk('Explain quicksort with a simple example')">Quicksort</button>
+          <button class="suggestion-btn" onclick="quickAsk('What is the difference between TCP and UDP?')">TCP vs UDP</button>
+          <button class="suggestion-btn" onclick="quickAsk('How does a hash map work?')">Hash Maps</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Chat Input Fields -->
+  <div class="chat-input-area" style="position: relative;">
+    
+    <!-- Image Preview Thumbnail (above input) -->
+    <div id="image-preview-container" class="image-preview-container hidden">
+      <img id="image-preview" src="" alt="Scan preview">
+      <button class="btn-remove-image" onclick="removeImage();" title="Remove image">&times;</button>
+    </div>
+
+    <!-- Hidden native file/camera selector -->
+    <input type="file" id="camera-file-input" accept="image/*" capture="environment" style="display: none;" onchange="handleImageUpload(event)">
+
+    <div class="chat-input-wrapper">
+      <button class="btn-camera" onclick="triggerCamera();" title="Scan question/image">
+        <i class="fa-solid fa-camera"></i>
+      </button>
+      <input type="text" id="question-input" class="input-control" placeholder="Ask a CS question..." onkeydown="if(event.key === 'Enter') sendQuestion();" autocomplete="off" style="padding-left: 45px;">
+      <button class="btn-send" onclick="sendQuestion();" aria-label="Send message">
+        <i class="fa-solid fa-paper-plane"></i>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Global reference for attached image
+  window.attachedImage = null;
+
+  function triggerCamera() {
+    document.getElementById('camera-file-input').click();
+  }
+
+  function handleImageUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Verify it is an image
+    if (!file.type.startsWith('image/')) {
+      alert('⚠️ Only image files are supported.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const base64Data = e.target.result.split(',')[1];
+      window.attachedImage = {
+        mime_type: file.type,
+        data: base64Data
+      };
+
+      // Show preview
+      const previewImg = document.getElementById('image-preview');
+      const previewContainer = document.getElementById('image-preview-container');
+      previewImg.src = e.target.result;
+      previewContainer.classList.remove('hidden');
+    };
+    reader.readAsDataURL(file);
+  }
+
+  window.removeImage = function() {
+    window.attachedImage = null;
+    document.getElementById('camera-file-input').value = '';
+    document.getElementById('image-preview').src = '';
+    document.getElementById('image-preview-container').classList.add('hidden');
+  }
+
+  function quickAsk(questionText) {
+    const input = document.getElementById('question-input');
+    if (input) {
+      input.value = questionText;
+      sendQuestion();
+    }
+  }
+</script>
+{% endblock %}

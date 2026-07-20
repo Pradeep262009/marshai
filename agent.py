@@ -16,7 +16,7 @@ if not GEMINI_API_KEY or GEMINI_API_KEY == "YOUR_GEMINI_API_KEY_HERE":
 genai.configure(api_key=GEMINI_API_KEY)
 
 model = genai.GenerativeModel(
-    model_name="gemini-1.5-flash",   # Fast + free tier
+    model_name="gemini-3.5-flash",   # Fast + free tier
     system_instruction="""
     You are MARSHAI, a smart and friendly AI tutor for university students.
     Your job is to explain Computer Science concepts clearly and simply.
@@ -27,9 +27,18 @@ model = genai.GenerativeModel(
     """
 )
 
-def ask_marshai(question: str) -> str:
+def ask_marshai(question: str, image_data: dict = None) -> str:
     try:
-        response = model.generate_content(question)
+        contents = [question]
+        if image_data:
+            import base64
+            img_bytes = base64.b64decode(image_data['data'])
+            img_part = {
+                'mime_type': image_data['mime_type'],
+                'data': img_bytes
+            }
+            contents.append(img_part)
+        response = model.generate_content(contents)
         return response.text
     except Exception as e:
         return f"⚠️ MARSHAI Error: {str(e)}"
