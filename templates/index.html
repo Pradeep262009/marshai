@@ -112,6 +112,15 @@
     document.getElementById('auth-tabs-nav').classList.remove('hidden');
     switchTab('login');
   }
+
+  // Restore correct tab when a form submission fails and the page re-renders
+  window.onload = function() {
+    {% if request.path == '/login' %}
+      switchTab('login');
+    {% elif request.path == '/reset' %}
+      showResetForm();
+    {% endif %}
+  };
 </script>
 
 {% endblock %}
