@@ -1,9 +1,12 @@
+import sys
+from pathlib import Path
+sys.path.append(str(Path(__file__).parent))
+
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from database import save_chat_history, get_user_chat_history, get_total_chats
 from agent import ask_marshai
 from datetime import datetime
 from dotenv import load_dotenv
-from pathlib import Path
 import os
 import pyrebase
 
