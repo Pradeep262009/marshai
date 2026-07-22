@@ -45,6 +45,7 @@ def ask_marshai(question: str, image_data: dict = None) -> str:
 
 def ask_marshai_stream(question: str, image_data: dict = None):
     try:
+        yield "*(Debug) Connecting to AI...* "
         contents = [question]
         if image_data:
             import base64
@@ -55,8 +56,15 @@ def ask_marshai_stream(question: str, image_data: dict = None):
             }
             contents.append(img_part)
         response = model.generate_content(contents, stream=True)
+        
+        has_chunks = False
         for chunk in response:
             if chunk.text:
+                has_chunks = True
                 yield chunk.text
+                
+        if not has_chunks:
+            yield " *(Debug) Error: The AI model returned an empty response.*"
+            
     except Exception as e:
         yield f"⚠️ MARSHAI Error: {str(e)}"
