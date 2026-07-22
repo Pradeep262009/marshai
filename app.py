@@ -7,7 +7,6 @@ from database import save_chat_history, get_user_chat_history, get_total_chats
 from agent import ask_marshai
 from datetime import datetime
 from dotenv import load_dotenv
-import requests
 import os
 import pyrebase
 
@@ -98,39 +97,7 @@ def login():
         error = "Login failed! Check your email and password."
         return render_template('index.html', error=error)
 
-# ── Google Sign-In ─────────────────────────────────────
-@app.route('/login/google', methods=['POST'])
-def login_google():
-    data = request.get_json()
-    id_token = data.get('id_token')
-    if not id_token:
-        return jsonify({'success': False, 'error': 'Missing ID Token'}), 400
-    
-    # Authenticate with Google ID Token via Firebase Auth REST API
-    api_key = os.getenv('FIREBASE_API_KEY')
-    url = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithIdp?key={api_key}"
-    payload = {
-        "postBody": f"id_token={id_token}&providerId=google.com",
-        "requestUri": "http://localhost",
-        "returnIdpCredential": True,
-        "returnSecureToken": True
-    }
-    
-    try:
-        res = requests.post(url, json=payload)
-        user_data = res.json()
-        if 'error' in user_data:
-            return jsonify({'success': False, 'error': user_data['error']['message']}), 400
-        
-        # Save session
-        session['user'] = {
-            'uid':   user_data['localId'],
-            'email': user_data['email'],
-            'name':  user_data.get('displayName', user_data['email'].split('@')[0].capitalize())
-        }
-        return jsonify({'success': True})
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
+
 
 # ── Logout ────────────────────────────────────────────
 @app.route('/logout')
