@@ -13,7 +13,7 @@ GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
 if not GEMINI_API_KEY or GEMINI_API_KEY == "YOUR_GEMINI_API_KEY_HERE":
     raise ValueError("ERROR: GEMINI_API_KEY not configured in .env file!")
 
-genai.configure(api_key=GEMINI_API_KEY)
+genai.configure(api_key=GEMINI_API_KEY, transport="rest")
 
 model = genai.GenerativeModel(
     model_name="gemini-3.5-flash",   # Fast + free tier
@@ -45,9 +45,6 @@ def ask_marshai(question: str, image_data: dict = None) -> str:
 
 def ask_marshai_stream(question: str, image_data: dict = None):
     try:
-        first_chunk = "*(Debug) Connecting to AI...* "
-        yield first_chunk
-        
         contents = [question]
         if image_data:
             import base64
