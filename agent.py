@@ -42,3 +42,21 @@ def ask_marshai(question: str, image_data: dict = None) -> str:
         return response.text
     except Exception as e:
         return f"⚠️ MARSHAI Error: {str(e)}"
+
+def ask_marshai_stream(question: str, image_data: dict = None):
+    try:
+        contents = [question]
+        if image_data:
+            import base64
+            img_bytes = base64.b64decode(image_data['data'])
+            img_part = {
+                'mime_type': image_data['mime_type'],
+                'data': img_bytes
+            }
+            contents.append(img_part)
+        response = model.generate_content(contents, stream=True)
+        for chunk in response:
+            if chunk.text:
+                yield chunk.text
+    except Exception as e:
+        yield f"⚠️ MARSHAI Error: {str(e)}"

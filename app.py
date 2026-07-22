@@ -2,9 +2,10 @@ import sys
 from pathlib import Path
 sys.path.append(str(Path(__file__).parent))
 
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify, Response
 from database import save_chat_history, get_user_chat_history, get_total_chats
-from agent import ask_marshai
+from agent import ask_marshai, ask_marshai_stream
+import json
 from datetime import datetime
 from dotenv import load_dotenv
 import os
@@ -139,17 +140,26 @@ def chat():
 def ask():
     user = get_current_user()
     if not user:
-        return jsonify({'answer': '⚠️ Please login first.'})
+        return Response("data: {\"error\": \"Please login first.\"}\n\n", mimetype='text/event-stream')
     data       = request.get_json()
     question   = data.get('question', '')
     image_data = data.get('image', None) # dict {mime_type, data}
-    answer     = ask_marshai(question, image_data)
     
-    # Save to Firebase (indicate image attachment in database log)
-    db_question = f"📷 [Image Scan] {question}" if image_data else question
-    save_chat_history(firebase, user['uid'], user['email'], db_question, answer)
-    
-    return jsonify({'answer': answer})
+    def generate():
+        full_answer = []
+        try:
+            for chunk in ask_marshai_stream(question, image_data):
+                full_answer.append(chunk)
+                yield f"data: {json.dumps({'text': chunk})}\n\n"
+        except Exception as e:
+            yield f"data: {json.dumps({'error': str(e)})}\n\n"
+        
+        # Save to Firebase once full answer is accumulated
+        if full_answer:
+            db_question = f"📷 [Image Scan] {question}" if image_data else question
+            save_chat_history(firebase, user['uid'], user['email'], db_question, "".join(full_answer))
+            
+    return Response(generate(), mimetype='text/event-stream')
 
 # ── History ───────────────────────────────────────────
 @app.route('/history')

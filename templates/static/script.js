@@ -74,13 +74,53 @@ async function sendQuestion() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
-        const data = await res.json();
-        const answer = data.answer || '⚠️ Something went wrong.';
 
-        // Replace typing with answer
+        if (!res.ok) {
+            throw new Error('Server returned error status');
+        }
+
         const typingEl = document.getElementById(typingId);
-        if (typingEl) {
-            typingEl.querySelector('.bubble').innerHTML = formatAnswer(answer);
+        const bubbleEl = typingEl ? typingEl.querySelector('.bubble') : null;
+        if (bubbleEl) {
+            // Clear typing dots
+            bubbleEl.innerHTML = '';
+        }
+
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let done = false;
+        let buffer = '';
+        let accumulatedAnswer = '';
+
+        while (!done) {
+            const { value, done: readerDone } = await reader.read();
+            done = readerDone;
+            buffer += decoder.decode(value || new Uint8Array(), { stream: !done });
+
+            const lines = buffer.split('\n');
+            buffer = lines.pop(); // Keep incomplete line in buffer
+
+            for (const line of lines) {
+                const trimmed = line.trim();
+                if (trimmed.startsWith('data: ')) {
+                    try {
+                        const jsonData = JSON.parse(trimmed.slice(6));
+                        if (jsonData.text) {
+                            accumulatedAnswer += jsonData.text;
+                            if (bubbleEl) {
+                                bubbleEl.innerHTML = formatAnswer(accumulatedAnswer);
+                            }
+                            scrollBottom();
+                        } else if (jsonData.error) {
+                            if (bubbleEl) {
+                                bubbleEl.innerHTML = `⚠️ Error: ${escapeHtml(jsonData.error)}`;
+                            }
+                        }
+                    } catch (e) {
+                        console.error('Error parsing stream chunk:', e);
+                    }
+                }
+            }
         }
     } catch (err) {
         const typingEl = document.getElementById(typingId);
