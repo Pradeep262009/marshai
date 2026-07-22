@@ -159,7 +159,9 @@ def ask():
             db_question = f"📷 [Image Scan] {question}" if image_data else question
             save_chat_history(firebase, user['uid'], user['email'], db_question, "".join(full_answer))
             
-    return Response(generate(), mimetype='text/event-stream')
+    response = Response(generate(), mimetype='text/event-stream')
+    response.headers['X-Accel-Buffering'] = 'no'
+    return response
 
 # ── History ───────────────────────────────────────────
 @app.route('/history')
