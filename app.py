@@ -144,11 +144,12 @@ def ask():
     data       = request.get_json()
     question   = data.get('question', '')
     image_data = data.get('image', None) # dict {mime_type, data}
+    history    = data.get('history', [])
     
     def generate():
         full_answer = []
         try:
-            for chunk in ask_marshai_stream(question, image_data):
+            for chunk in ask_marshai_stream(question, image_data, history):
                 full_answer.append(chunk)
                 yield f"data: {json.dumps({'text': chunk})}\n\n"
         except Exception as e:

@@ -43,9 +43,18 @@ def ask_marshai(question: str, image_data: dict = None) -> str:
     except Exception as e:
         return f"⚠️ MARSHAI Error: {str(e)}"
 
-def ask_marshai_stream(question: str, image_data: dict = None):
+def ask_marshai_stream(question: str, image_data: dict = None, history: list = None):
     try:
-        contents = [question]
+        # Prepend history to question for memory
+        if history:
+            context = "Chat History:\n"
+            for msg in history:
+                context += f"{msg['role']}: {msg['content']}\n"
+            context += f"\nNew Question: {question}"
+            contents = [context]
+        else:
+            contents = [question]
+
         if image_data:
             import base64
             img_bytes = base64.b64decode(image_data['data'])

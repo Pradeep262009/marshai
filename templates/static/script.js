@@ -17,6 +17,8 @@ function switchTab(tab) {
     }
 }
 
+let chatHistory = [];
+
 // ── Chat Logic ────────────────────────────────────
 async function sendQuestion() {
     const input = document.getElementById('question-input');
@@ -64,7 +66,9 @@ async function sendQuestion() {
 
     // Call backend
     try {
-        const payload = { question };
+        chatHistory.push({ role: 'User', content: question || "Scanned Image" });
+        
+        const payload = { question, history: chatHistory };
         if (imgToSend) {
             payload.image = imgToSend;
         }
@@ -108,7 +112,7 @@ async function sendQuestion() {
                         if (jsonData.text) {
                             accumulatedAnswer += jsonData.text;
                             if (bubbleEl) {
-                                bubbleEl.innerHTML = formatAnswer(accumulatedAnswer) || "<em>Empty response</em>";
+                                simulateTyping(bubbleEl, accumulatedAnswer);
                             }
                             scrollBottom();
                         } else if (jsonData.error) {
@@ -124,6 +128,10 @@ async function sendQuestion() {
                     }
                 }
             }
+        }
+        
+        if (accumulatedAnswer) {
+            chatHistory.push({ role: 'AI', content: accumulatedAnswer });
         }
     } catch (err) {
         const typingEl = document.getElementById(typingId);
@@ -143,14 +151,56 @@ function escapeHtml(text) {
     return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-function formatAnswer(text) {
-    // Escape HTML first to prevent XSS or invisible tags
-    text = escapeHtml(text || "");
+function simulateTyping(element, rawText) {
+    if (!rawText) {
+        element.innerHTML = "<em>Empty response</em>";
+        return;
+    }
     
-    // Basic markdown-like formatting
-    return text
-        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-        .replace(/\*(.*?)\*/g, '<em>$1</em>')
-        .replace(/`(.*?)`/g, '<code style="background:rgba(124,111,255,0.2);padding:2px 6px;border-radius:4px;">$1</code>')
-        .replace(/\n/g, '<br>');
+    // If it's called again while already typing (e.g. if streaming is re-enabled),
+    // instantly render the updated text to avoid overlapping timeouts.
+    if (element.dataset.typing) {
+        element.innerHTML = marked.parse(rawText);
+        scrollBottom();
+        return;
+    }
+    
+    element.dataset.typing = "true";
+    let index = 0;
+    const speed = 10; // ms per frame
+    const charsPerFrame = 4;
+
+    function typeWriter() {
+        if (index < rawText.length) {
+            index += charsPerFrame;
+            if (index > rawText.length) index = rawText.length;
+            element.innerHTML = marked.parse(rawText.substring(0, index));
+            scrollBottom();
+            setTimeout(typeWriter, speed);
+        } else {
+            element.innerHTML = marked.parse(rawText);
+            scrollBottom();
+            delete element.dataset.typing;
+        }
+    }
+    
+    typeWriter();
+}
+
+function exportChat() {
+    if (chatHistory.length === 0) {
+        alert("No chat history to export.");
+        return;
+    }
+    let exportText = "# MARSHAI Chat Export\n\n";
+    for (let msg of chatHistory) {
+        exportText += `**${msg.role}**:\n${msg.content}\n\n---\n\n`;
+    }
+    const blob = new Blob([exportText], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'marshai-chat-export.md';
+    a.click();
+    URL.revokeObjectURL(url);
 }

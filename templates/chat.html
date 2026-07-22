@@ -1,9 +1,14 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<div class="page-header">
-  <h1>💬 Chat with MARSHAI</h1>
-  <p>Ask anything about algorithms, OOP, databases, or systems</p>
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
+  <div>
+    <h1>💬 Chat with MARSHAI</h1>
+    <p>Ask anything about algorithms, OOP, databases, or systems</p>
+  </div>
+  <button class="btn btn-outline" onclick="exportChat()" style="display: flex; align-items: center; gap: 8px;">
+    <i class="fa-solid fa-download"></i> Export
+  </button>
 </div>
 
 <div class="chat-container">
