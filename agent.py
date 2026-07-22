@@ -55,16 +55,14 @@ def ask_marshai_stream(question: str, image_data: dict = None):
             }
             contents.append(img_part)
         
-        response = model.generate_content(contents, stream=True)
+        # Do not use stream=True to prevent gRPC/REST streaming hangs in serverless environments
+        response = model.generate_content(contents)
         
-        has_chunks = False
-        for chunk in response:
-            if chunk.text:
-                has_chunks = True
-                yield chunk.text
-                
-        if not has_chunks:
-            yield " *(Debug) Error: The AI model returned an empty response.*"
+        if response.text:
+            # Yield the entire response as a single chunk
+            yield response.text
+        else:
+            yield "*(Debug) Error: The AI model returned an empty response.*"
             
     except Exception as e:
         yield f"⚠️ MARSHAI Error: {str(e)}"
