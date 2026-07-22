@@ -45,26 +45,42 @@ def ask_marshai(question: str, image_data: dict = None) -> str:
 
 def ask_marshai_stream(question: str, image_data: dict = None):
     try:
-        yield "*(Debug) Connecting to AI...* "
-        contents = [question]
-        if image_data:
-            import base64
-            img_bytes = base64.b64decode(image_data['data'])
-            img_part = {
-                'mime_type': image_data['mime_type'],
-                'data': img_bytes
-            }
-            contents.append(img_part)
-        response = model.generate_content(contents, stream=True)
-        
-        has_chunks = False
-        for chunk in response:
-            if chunk.text:
-                has_chunks = True
-                yield chunk.text
+        with open("debug_chunks.txt", "w", encoding="utf-8") as f:
+            f.write("STREAM STARTED\n")
+            
+            first_chunk = "*(Debug) Connecting to AI...* "
+            f.write(f"YIELDING: {first_chunk}\n")
+            yield first_chunk
+            
+            contents = [question]
+            if image_data:
+                import base64
+                img_bytes = base64.b64decode(image_data['data'])
+                img_part = {
+                    'mime_type': image_data['mime_type'],
+                    'data': img_bytes
+                }
+                contents.append(img_part)
+            
+            f.write("CALLING GENERATE CONTENT\n")
+            response = model.generate_content(contents, stream=True)
+            
+            has_chunks = False
+            for chunk in response:
+                if chunk.text:
+                    has_chunks = True
+                    f.write(f"YIELDING: {repr(chunk.text)}\n")
+                    f.flush()
+                    yield chunk.text
+                    
+            if not has_chunks:
+                err_chunk = " *(Debug) Error: The AI model returned an empty response.*"
+                f.write(f"YIELDING: {err_chunk}\n")
+                yield err_chunk
                 
-        if not has_chunks:
-            yield " *(Debug) Error: The AI model returned an empty response.*"
+            f.write("STREAM FINISHED\n")
             
     except Exception as e:
+        with open("debug_chunks.txt", "a", encoding="utf-8") as f:
+            f.write(f"EXCEPTION: {str(e)}\n")
         yield f"⚠️ MARSHAI Error: {str(e)}"
