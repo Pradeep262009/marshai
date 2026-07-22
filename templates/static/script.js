@@ -108,7 +108,7 @@ async function sendQuestion() {
                         if (jsonData.text) {
                             accumulatedAnswer += jsonData.text;
                             if (bubbleEl) {
-                                bubbleEl.innerHTML = formatAnswer(accumulatedAnswer);
+                                bubbleEl.innerHTML = formatAnswer(accumulatedAnswer) || "<em>Empty response</em>";
                             }
                             scrollBottom();
                         } else if (jsonData.error) {
@@ -117,7 +117,10 @@ async function sendQuestion() {
                             }
                         }
                     } catch (e) {
-                        console.error('Error parsing stream chunk:', e);
+                        console.error('Error parsing stream chunk:', e, 'Line:', trimmed);
+                        if (bubbleEl && !accumulatedAnswer) {
+                            bubbleEl.innerHTML = "⚠️ Error displaying response.";
+                        }
                     }
                 }
             }
@@ -141,6 +144,9 @@ function escapeHtml(text) {
 }
 
 function formatAnswer(text) {
+    // Escape HTML first to prevent XSS or invisible tags
+    text = escapeHtml(text || "");
+    
     // Basic markdown-like formatting
     return text
         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
