@@ -2,13 +2,13 @@
 {% block content %}
 
 
-<div class="auth-container">
+<div class="auth-container" data-path="{{ request.path }}">
   <div class="glass-card auth-card">
     
     <!-- Tab Controls (Login / Signup) -->
     <div class="auth-tabs" id="auth-tabs-nav">
-      <button class="tab-btn" onclick="switchTab('login')">Login</button>
-      <button class="tab-btn active" onclick="switchTab('signup')">Sign Up</button>
+      <button type="button" class="tab-btn" onclick="switchTab('login')">Login</button>
+      <button type="button" class="tab-btn active" onclick="switchTab('signup')">Sign Up</button>
     </div>
 
     <!-- Login Form Card -->
@@ -26,7 +26,7 @@
 
 
       <p class="auth-switch-link">
-        <a onclick="showResetForm()">Forgot password?</a>
+        <a href="#" onclick="event.preventDefault(); showResetForm()">Forgot password?</a>
       </p>
     </form>
 
@@ -49,7 +49,7 @@
 
 
       <p class="auth-switch-link">
-        Already have an account? <a onclick="switchTab('login')">Sign In</a>
+        Already have an account? <a href="#" onclick="event.preventDefault(); switchTab('login')">Sign In</a>
       </p>
     </form>
 
@@ -61,11 +61,11 @@
       </div>
       <div class="form-group">
         <label for="reset-email">Email Address</label>
-        <input type="email" id="reset-email" name="email" class="input-control" placeholder="yourname@univ.edu" required>
+        <input type="email" id="reset-email" name="email" class="input-control" placeholder="yourname@univ.edu" required autocomplete="email">
       </div>
       <button type="submit" class="btn-primary">Send Reset Link</button>
       <p class="auth-switch-link">
-        <a onclick="hideResetForm()"><i class="fa-solid fa-arrow-left"></i> Back to Login</a>
+        <a href="#" onclick="event.preventDefault(); hideResetForm()"><i class="fa-solid fa-arrow-left"></i> Back to Login</a>
       </p>
     </form>
 
@@ -91,11 +91,13 @@
 
   // Restore correct tab when a form submission fails and the page re-renders
   window.onload = function() {
-    {% if request.path == '/login' %}
+    const container = document.querySelector('.auth-container');
+    const path = container ? container.getAttribute('data-path') : '';
+    if (path === '/login') {
       switchTab('login');
-    {% elif request.path == '/reset' %}
+    } else if (path === '/reset') {
       showResetForm();
-    {% endif %}
+    }
   };
 </script>
 
